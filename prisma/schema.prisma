@@ -1,11 +1,42 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        Int     @id @default(autoincrement())
+  name      String?
+  email     String  @unique
+  posts     Post[]
+  followers User[]  @relation("UserToUser")
+  user      User?   @relation("UserToUser", fields: [userId], references: [id])
+  userId    Int?
+}
+
+model Post {
+  id      Int     @id @default(autoincrement())
+  title   String
+  content String?
+  user    User?   @relation(fields: [userId], references: [id])
+  userId  Int?
+  tags    Tag[]
+  views   Int     @default(0)
+  deleted Boolean @default(false)
+}
+
+model Category {
+  id             Int        @id @default(autoincrement())
+  parentCategory Category?  @relation("CategoryToCategory", fields: [categoryId], references: [id])
+  category       Category[] @relation("CategoryToCategory")
+  categoryId     Int?
+}
+
+model Tag {
+  tagName String @id // Must be unique
+  posts   Post[]
 }
